@@ -152,7 +152,7 @@ canvas{display:block;border-radius:50%;box-shadow:0 4px 24px rgba(160,120,200,.1
   </div>
 </div>
 
-<footer class="version">released V1.3</footer>
+<footer class="version">released V1.4</footer>
 
 <script>
 const PALETTE = [
@@ -223,9 +223,10 @@ function drawWheel(rot){
     ctx.fillStyle=PALETTE[i%PALETTE.length];ctx.fill();
     ctx.strokeStyle='#F5F0FA';ctx.lineWidth=2;ctx.stroke();
     ctx.save();ctx.translate(cx,cy);ctx.rotate(s+slice/2);
-    ctx.textAlign='right';ctx.fillStyle=TEXT_ON;
+    ctx.textAlign='right';ctx.textBaseline='middle';ctx.fillStyle=TEXT_ON;
     // available horizontal space from center outward, leaving room for hub + rim
-    const maxW = r - 26;
+    const outer = r - 18;      // right edge of text (keeps clear of the rim)
+    const maxW = outer - 24;   // usable width before the hub
     let label = t.name;
     let fs = av.length > 8 ? 10 : 11;
     ctx.font = `400 ${fs}px Inter,sans-serif`;
@@ -241,7 +242,7 @@ function drawWheel(rot){
       }
       label += '…';
     }
-    ctx.fillText(label, r-12, 4);
+    ctx.fillText(label, outer, 0);
     ctx.restore();
   });
   ctx.beginPath();ctx.arc(cx,cy,16,0,2*Math.PI);
@@ -339,6 +340,8 @@ function resetDone(){
 initTasks(currentTab);
 renderList();
 drawWheel(angle);
+// redraw once the web font is ready so label widths are measured correctly
+if(document.fonts&&document.fonts.ready){document.fonts.ready.then(()=>drawWheel(angle));}
 </script>
 </body>
 </html>
