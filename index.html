@@ -153,7 +153,7 @@ canvas{display:block;border-radius:50%;box-shadow:0 4px 24px rgba(160,120,200,.1
   </div>
 </div>
 
-<footer class="version">released V1.7</footer>
+<footer class="version">released V1.8</footer>
 
 <script>
 const PALETTE = [
@@ -228,8 +228,8 @@ function drawWheel(rot){
     // Anchor the label just outside the hub and let it grow outward toward the rim.
     // This keeps the leading gap (near the centre) small and gives long words the
     // full radial band to run into before they need shrinking/truncating.
-    const innerR = 20;          // start just outside the hub (small leading gap)
-    const outerR = r - 14;      // must finish before the rim
+    const innerR = 20 + r*0.10; // leading gap: hub clearance + ~10% of the radius
+    const outerR = r - 12;      // must finish before the rim
     const maxW   = outerR - innerR;   // radial room available for the label
     // Rendered Thai glyphs can be wider than measureText() reports, and by a
     // different amount per device — treat text as SAFETY× wider so it still fits.
