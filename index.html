@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Chore Roulette</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  font-family:'Inter',sans-serif;
+  background:#F5F0FA;
+  color:#3D3050;
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  padding:2.5rem 1.25rem 3rem;
+}
+header{text-align:center;margin-bottom:2rem}
+header h1{font-size:13px;font-weight:400;letter-spacing:.14em;color:#9B8EAA;margin-bottom:10px}
+.hdr-rule{display:flex;align-items:center;justify-content:center;gap:10px}
+.hdr-rule span{width:32px;height:1.5px;background:#D0BEE0}
+.hdr-dot{width:6px;height:6px;border-radius:50%;background:#C8ADDC}
+
+/* ── tabs ── */
+.tabs{display:flex;gap:6px;margin-bottom:2rem;background:#EAD8F8;border-radius:24px;padding:4px}
+.tab-btn{
+  flex:1;padding:8px 20px;
+  font-family:'Inter',sans-serif;font-size:12px;font-weight:400;
+  letter-spacing:.06em;color:#9B8EAA;
+  background:transparent;border:none;border-radius:20px;
+  cursor:pointer;transition:background .18s,color .18s;white-space:nowrap;
+}
+.tab-btn.active{background:#fff;color:#5A4A80;box-shadow:0 1px 6px rgba(160,120,200,.15)}
+
+/* ── layout ── */
+.layout{
+  width:100%;max-width:720px;
+  display:grid;grid-template-columns:1fr 280px;gap:2rem;align-items:start;
+}
+@media(max-width:580px){.layout{grid-template-columns:1fr}}
+
+/* ── wheel ── */
+.wheel-col{display:flex;flex-direction:column;align-items:center;gap:1.25rem}
+.wheel-frame{position:relative;display:inline-flex}
+.ptr{
+  position:absolute;top:-10px;left:50%;transform:translateX(-50%);
+  width:0;height:0;
+  border-left:8px solid transparent;border-right:8px solid transparent;
+  border-top:18px solid #C0A0D0;z-index:5;
+  filter:drop-shadow(0 2px 4px rgba(160,120,200,.25));
+}
+canvas{display:block;border-radius:50%;box-shadow:0 4px 24px rgba(160,120,200,.18)}
+.spin-btn{
+  width:100%;padding:13px;
+  font-family:'Inter',sans-serif;font-size:13px;font-weight:400;letter-spacing:.1em;
+  color:#7060A0;background:#E8D8F4;border:none;border-radius:40px;cursor:pointer;
+  transition:background .15s,color .15s,transform .1s;
+}
+.spin-btn:hover{background:#DCC8EE;color:#50408A}
+.spin-btn:active{transform:scale(.98)}
+.spin-btn:disabled{opacity:.4;cursor:default;transform:none}
+.result-card{
+  width:100%;border-radius:20px;background:#EAD8F8;
+  padding:1.5rem 1.25rem;text-align:center;min-height:100px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;
+}
+.result-eyebrow{font-size:10px;letter-spacing:.14em;color:#B09AC8}
+.result-idle{font-size:14px;font-weight:300;color:#C0A8D8}
+.result-task{font-size:22px;font-weight:300;color:#3D3050;display:none;line-height:1.3}
+.mark-btn{
+  display:none;font-size:12px;font-weight:400;letter-spacing:.08em;
+  padding:7px 18px;border-radius:24px;border:1.5px solid #C4A8DC;
+  background:transparent;color:#7860A8;cursor:pointer;transition:background .15s;
+}
+.mark-btn:hover{background:#DCC8EE}
+
+/* ── panel ── */
+.panel{display:flex;flex-direction:column;gap:1.25rem}
+.sec-label{font-size:10px;letter-spacing:.14em;color:#B09AC8;margin-bottom:.6rem}
+.task-list{display:flex;flex-direction:column;gap:5px;max-height:360px;overflow-y:auto}
+.task-list::-webkit-scrollbar{width:3px}
+.task-list::-webkit-scrollbar-thumb{background:#D0B8E8;border-radius:2px}
+.task-item{
+  display:flex;align-items:center;gap:10px;padding:9px 12px;
+  background:#EAD8F8;border-radius:12px;font-size:13px;color:#3D3050;transition:opacity .2s;
+}
+.task-item.done{opacity:.38}
+.task-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.task-name{flex:1;font-weight:300}
+.task-name.striked{text-decoration:line-through;color:#B09AC8}
+.stats-row{display:flex;gap:8px}
+.stat{flex:1;background:#EAD8F8;border-radius:14px;padding:12px;text-align:center}
+.stat-n{font-size:22px;font-weight:300;color:#3D3050}
+.stat-l{font-size:10px;letter-spacing:.12em;color:#B09AC8;margin-top:3px}
+.reset-btn{
+  width:100%;padding:10px;
+  font-family:'Inter',sans-serif;font-size:12px;letter-spacing:.1em;
+  color:#B09AC8;background:transparent;border:1.5px solid #D4C0EC;border-radius:24px;
+  cursor:pointer;transition:border-color .15s,color .15s;
+}
+.reset-btn:hover{border-color:#B898D4;color:#8070B0}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>household roulette</h1>
+  <div class="hdr-rule"><span></span><div class="hdr-dot"></div><span></span></div>
+</header>
+
+<div class="tabs">
+  <button class="tab-btn active" onclick="switchTab('weekday')">📅 วันธรรมดา</button>
+  <button class="tab-btn" onclick="switchTab('weekend')">🌸 วันหยุด</button>
+</div>
+
+<div class="layout">
+  <div class="wheel-col">
+    <div class="wheel-frame">
+      <div class="ptr"></div>
+      <canvas id="wheel" width="260" height="260"></canvas>
+    </div>
+    <button class="spin-btn" id="spinBtn" onclick="spin()">spin the wheel</button>
+    <div class="result-card">
+      <div class="result-eyebrow">your chore</div>
+      <div class="result-idle" id="resultIdle">—</div>
+      <div class="result-task" id="resultTask"></div>
+      <button class="mark-btn" id="markBtn" onclick="markDone()">✓ &nbsp;mark as done</button>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div>
+      <div class="sec-label" id="poolLabel">chore pool — วันธรรมดา</div>
+      <div class="task-list" id="taskList"></div>
+    </div>
+    <div class="stats-row">
+      <div class="stat"><div class="stat-n" id="statP">0</div><div class="stat-l">pending</div></div>
+      <div class="stat"><div class="stat-n" id="statD">0</div><div class="stat-l">done</div></div>
+    </div>
+    <button class="reset-btn" onclick="resetDone()">reset done tasks</button>
+  </div>
+</div>
+
+<script>
+const PALETTE = [
+  '#C8ADDC','#A8C8E8','#F0A8BC','#A8D8C0','#F0D898',
+  '#B8C8F0','#F0B8A0','#A8D4D0','#D8B0D0','#B8DCA8'
+];
+const TEXT_ON = '#5A4A64';
+
+const POOLS = {
+  weekday: ['ล้างจาน','ดูดฝุ่น','เก็บผ้า','เหยียบขวด','ล้างแปรงแต่งหน้า','เก็บโต๊ะคอม','ล้างห้องน้ำ','ล้างส้วม'],
+  weekend: ['ซักผ้า','เหยียบขวด','ล้างจาน','เช็ดฝุ่น','ดูดฝุ่น','เก็บของมุมต่างๆ(จัดระเบียบ)','เคลียร์ของที่ไม่ได้ใช้(ทิ้ง)','ขัดประตูห้องน้ำ'],
+};
+const LABEL = {weekday:'วันธรรมดา', weekend:'วันหยุด'};
+
+let currentTab = 'weekday';
+let tasks = [];
+let spinning = false, angle = 0, currentResult = null;
+
+function initTasks(tab){
+  tasks = POOLS[tab].map(n=>({name:n, done:false}));
+}
+
+function active(){return tasks.filter(t=>!t.done)}
+
+function switchTab(tab){
+  if(tab === currentTab) return;
+  currentTab = tab;
+  document.querySelectorAll('.tab-btn').forEach((b,i)=>{
+    b.classList.toggle('active', (i===0 && tab==='weekday')||(i===1 && tab==='weekend'));
+  });
+  document.getElementById('poolLabel').textContent = `chore pool — ${LABEL[tab]}`;
+  initTasks(tab);
+  angle = 0;
+  clearResult();
+  renderList();
+  drawWheel(angle);
+}
+
+function drawWheel(rot){
+  const c=document.getElementById('wheel');
+  const ctx=c.getContext('2d');
+  const cx=130,cy=130,r=124;
+  ctx.clearRect(0,0,260,260);
+  ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.fillStyle='#EAD8F8';ctx.fill();
+  const av=active();
+  if(!av.length){
+    ctx.fillStyle='#B09AC8';ctx.font='13px Inter,sans-serif';
+    ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText('all done! 🎉',cx,cy);return;
+  }
+  const slice=(2*Math.PI)/av.length;
+  av.forEach((t,i)=>{
+    const s=rot+i*slice, e=s+slice;
+    ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,r,s,e);ctx.closePath();
+    ctx.fillStyle=PALETTE[i%PALETTE.length];ctx.fill();
+    ctx.strokeStyle='#F5F0FA';ctx.lineWidth=2;ctx.stroke();
+    ctx.save();ctx.translate(cx,cy);ctx.rotate(s+slice/2);
+    ctx.textAlign='right';ctx.fillStyle=TEXT_ON;
+    const fs=av.length>8?9:11;ctx.font=`400 ${fs}px Inter,sans-serif`;
+    const label=t.name.length>10?t.name.slice(0,9)+'…':t.name;
+    ctx.fillText(label,r-10,4);ctx.restore();
+  });
+  ctx.beginPath();ctx.arc(cx,cy,16,0,2*Math.PI);
+  ctx.fillStyle='#F5F0FA';ctx.fill();
+  ctx.strokeStyle='#D4C0EC';ctx.lineWidth=1.5;ctx.stroke();
+}
+
+function renderList(){
+  const el=document.getElementById('taskList');
+  let ai=0;
+  const colors=tasks.map(t=>t.done?'#D8C8EC':PALETTE[ai++%PALETTE.length]);
+  el.innerHTML=tasks.map((t,i)=>`
+    <div class="task-item${t.done?' done':''}">
+      <div class="task-dot" style="background:${colors[i]}"></div>
+      <span class="task-name${t.done?' striked':''}">${t.name}</span>
+    </div>`).join('');
+  updateStats();
+}
+
+function updateStats(){
+  document.getElementById('statP').textContent=tasks.filter(t=>!t.done).length;
+  document.getElementById('statD').textContent=tasks.filter(t=>t.done).length;
+}
+
+function clearResult(){
+  document.getElementById('resultIdle').style.display='block';
+  document.getElementById('resultIdle').textContent='—';
+  document.getElementById('resultTask').style.display='none';
+  document.getElementById('markBtn').style.display='none';
+  currentResult=null;
+}
+
+function spin(){
+  const av=active();
+  if(spinning||!av.length)return;
+  spinning=true;
+  document.getElementById('spinBtn').disabled=true;
+  document.getElementById('resultIdle').textContent='…';
+  document.getElementById('resultIdle').style.display='block';
+  document.getElementById('resultTask').style.display='none';
+  document.getElementById('markBtn').style.display='none';
+  const totalRot=(Math.PI*2*7)+Math.random()*Math.PI*2;
+  const dur=3400, start=performance.now(), startA=angle;
+  function step(now){
+    const t=Math.min((now-start)/dur,1);
+    const ease=1-Math.pow(1-t,4);
+    angle=startA+totalRot*ease;
+    drawWheel(angle);
+    if(t<1){requestAnimationFrame(step);}
+    else{
+      angle=angle%(Math.PI*2);
+      drawWheel(angle);
+      showResult();
+      spinning=false;
+      document.getElementById('spinBtn').disabled=false;
+    }
+  }
+  requestAnimationFrame(step);
+}
+
+function showResult(){
+  const av=active();if(!av.length)return;
+  const slice=(Math.PI*2)/av.length;
+  // Pointer at top = -π/2 in canvas coords
+  // Slice i spans: angle + i*slice  to  angle + (i+1)*slice
+  // Find i where that range contains -π/2
+  const pointerAngle = -Math.PI/2;
+  const raw = (pointerAngle - angle) / slice;
+  const idx = ((Math.floor(raw) % av.length) + av.length) % av.length;
+  currentResult = av[idx];
+  document.getElementById('resultIdle').style.display='none';
+  const rt=document.getElementById('resultTask');
+  rt.textContent=currentResult.name;rt.style.display='block';
+  document.getElementById('markBtn').style.display='inline-block';
+}
+
+function markDone(){
+  if(!currentResult)return;
+  const i=tasks.indexOf(currentResult);
+  if(i>-1)tasks[i].done=true;
+  currentResult=null;
+  document.getElementById('markBtn').style.display='none';
+  document.getElementById('resultTask').style.display='none';
+  document.getElementById('resultIdle').textContent='done · spin again';
+  document.getElementById('resultIdle').style.display='block';
+  renderList();drawWheel(angle);
+}
+
+function resetDone(){
+  tasks.forEach(t=>t.done=false);
+  renderList();drawWheel(angle);clearResult();
+}
+
+// init
+initTasks(currentTab);
+renderList();
+drawWheel(angle);
+</script>
+</body>
+</html>
