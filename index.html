@@ -54,7 +54,7 @@ header h1{font-size:13px;font-weight:400;letter-spacing:.14em;color:#9B8EAA;marg
   border-top:18px solid #C0A0D0;z-index:5;
   filter:drop-shadow(0 2px 4px rgba(160,120,200,.25));
 }
-canvas{display:block;border-radius:50%;box-shadow:0 4px 24px rgba(160,120,200,.18);max-width:100%}
+canvas{display:block;border-radius:50%;box-shadow:0 4px 24px rgba(160,120,200,.18);max-width:100%;cursor:pointer}
 @media(max-width:300px){
   .wheel-frame{width:100%;display:flex;justify-content:center}
 }
@@ -107,6 +107,9 @@ canvas{display:block;border-radius:50%;box-shadow:0 4px 24px rgba(160,120,200,.1
   cursor:pointer;transition:border-color .15s,color .15s;
 }
 .reset-btn:hover{border-color:#B898D4;color:#8070B0}
+
+/* ── version ── */
+.version{margin-top:auto;padding-top:2.5rem;font-size:11px;letter-spacing:.14em;color:#B09AC8}
 </style>
 </head>
 <body>
@@ -125,7 +128,7 @@ canvas{display:block;border-radius:50%;box-shadow:0 4px 24px rgba(160,120,200,.1
   <div class="wheel-col">
     <div class="wheel-frame">
       <div class="ptr"></div>
-      <canvas id="wheel" width="260" height="260"></canvas>
+      <canvas id="wheel" width="260" height="260" onclick="spin()"></canvas>
     </div>
     <button class="spin-btn" id="spinBtn" onclick="spin()">spin the wheel</button>
     <div class="result-card">
@@ -148,6 +151,8 @@ canvas{display:block;border-radius:50%;box-shadow:0 4px 24px rgba(160,120,200,.1
     <button class="reset-btn" onclick="resetDone()">reset done tasks</button>
   </div>
 </div>
+
+<footer class="version">released V1.3</footer>
 
 <script>
 const PALETTE = [
