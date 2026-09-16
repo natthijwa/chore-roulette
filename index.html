@@ -7,11 +7,12 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500&display=swap" rel="stylesheet"/>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%}
 body{
-  font-family:'Inter',sans-serif;
+  font-family:'Inter','Noto Sans Thai',sans-serif;
   background:#F5F0FA;
   color:#3D3050;
   min-height:100vh;
@@ -152,7 +153,7 @@ canvas{display:block;border-radius:50%;box-shadow:0 4px 24px rgba(160,120,200,.1
   </div>
 </div>
 
-<footer class="version">released V1.4</footer>
+<footer class="version">released V1.5</footer>
 
 <script>
 const PALETTE = [
@@ -212,7 +213,7 @@ function drawWheel(rot){
   ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.fillStyle='#EAD8F8';ctx.fill();
   const av=active();
   if(!av.length){
-    ctx.fillStyle='#B09AC8';ctx.font='13px Inter,sans-serif';
+    ctx.fillStyle='#B09AC8';ctx.font="13px 'Noto Sans Thai',Inter,sans-serif";
     ctx.textAlign='center';ctx.textBaseline='middle';
     ctx.fillText('all done! 🎉',cx,cy);return;
   }
@@ -229,11 +230,11 @@ function drawWheel(rot){
     const maxW = outer - 24;   // usable width before the hub
     let label = t.name;
     let fs = av.length > 8 ? 10 : 11;
-    ctx.font = `400 ${fs}px Inter,sans-serif`;
+    ctx.font = `400 ${fs}px 'Noto Sans Thai',Inter,sans-serif`;
     // shrink font down to a floor if the full name is too wide
     while(ctx.measureText(label).width > maxW && fs > 7){
       fs -= 0.5;
-      ctx.font = `400 ${fs}px Inter,sans-serif`;
+      ctx.font = `400 ${fs}px 'Noto Sans Thai',Inter,sans-serif`;
     }
     // if still too wide at min font, truncate with ellipsis
     if(ctx.measureText(label).width > maxW){
@@ -340,7 +341,16 @@ function resetDone(){
 initTasks(currentTab);
 renderList();
 drawWheel(angle);
-// redraw once the web font is ready so label widths are measured correctly
+// The wheel labels are Thai. `Inter` has no Thai glyphs, so measureText() and the
+// rendered glyphs would use different fallback fonts (and different widths) per device,
+// which makes labels overflow the wheel. Explicitly load a real Thai web font and
+// redraw so measurement and rendering use the SAME metrics everywhere.
+if(document.fonts&&document.fonts.load){
+  Promise.all([
+    document.fonts.load("400 12px 'Noto Sans Thai'"),
+    document.fonts.load("300 12px 'Noto Sans Thai'"),
+  ]).then(()=>drawWheel(angle)).catch(()=>{});
+}
 if(document.fonts&&document.fonts.ready){document.fonts.ready.then(()=>drawWheel(angle));}
 </script>
 </body>
